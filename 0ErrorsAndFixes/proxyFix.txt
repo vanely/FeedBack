@@ -1,0 +1,39 @@
+//PART 1
+//--------------------------------------------------
+The issue that you are facing is because of (CRA v2).
+
+Firstly, you will not require any additional configuration if you are just using a plain string in your proxy. But the moment you use an object, you are using advanced configuration.
+
+So, you would have to follow the steps listed below:
+
+Install http-proxy-middleware by typing npm i --save http-proxy-middleware
+
+Remove the entries from package.json:
+
+"proxy": {
+    "/auth/google": {
+        "target": "http://localhost:5000"
+    }
+}
+
+
+Now create a setup file for your proxy. You can name it setupProxy.js in your src folder on the client side and type the following code:
+
+const proxy = require('http-proxy-middleware');
+module.exports = function(app) {
+    app.use(proxy('/auth/google', 
+        { target: 'http://localhost:5000/' }
+    ));
+}
+
+//PART 2
+//--------------------------------------------------
+The proxy value in package.json does still work in CRA 2, but it now only accepts a string, more complicated proxy options have to be put in src/setupProxy.js as you are doing. But be careful, if you leave the proxy property in package.json CRA will use that and ignore your setupProxy.js file.
+
+You don't need to import setupProxy.js anywhere, CRA will find it as long as it's in src.
+
+Don't worry about where app comes from, that variable will be provided at runtime.
+
+Your example will work, I've tried it (as long as you remove the old proxy string from package.json). But the console.log will not be logged to the terminal (I'm not sure why).
+
+Further reading, the PR where this change was introduced: https://github.com/facebook/create-react-app/pull/5073
